@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Api, JsonRpc, RpcError, JsSignatureProvider } from 'eosjs'; // https://github.com/EOSIO/eosjs
 import { TextDecoder, TextEncoder } from 'text-encoding';
+// import firebase from 'firebase';
 
 // material-ui dependencies
 import { withStyles } from '@material-ui/core/styles';
@@ -12,6 +13,7 @@ import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import firebase from 'firebase/app';
 
 // eosio endpoint
 const endpoint = "http://localhost:8888";
@@ -58,6 +60,32 @@ class Index extends Component {
     };
     this.handleFormEvent = this.handleFormEvent.bind(this);
   }
+
+  getTable2() {
+    const rpc = new JsonRpc(endpoint);
+    rpc.get_table_rows({
+      "json": true,
+      "code": "notechainacc",   // contract who owns the table
+      "scope": "notechainacc",  // scope of the table
+      "table": "notestruct",    // name of the table as specified by the contract abi
+      "limit": 100,
+    }).then(result => this.setState({ noteTable: result.rows }));
+  }
+
+  writeUserData2(userId, name, email, imageUrl) {
+    debugger;
+    firebase.database().ref('player/' + userId).set({
+      username: name,
+      email: email,
+      profile_picture : imageUrl
+    })
+  }
+
+  // async handleFormEvent(event) {
+  //   debugger
+  //   this.writeUserData2(5, 'bob', 'bob@email', 'url')
+  //   // this.getTable2()
+  // }
 
   // generic function to handle form events (e.g. "submit" / "reset")
   // push transactions to the blockchain by using eosjs
