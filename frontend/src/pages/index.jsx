@@ -92,6 +92,8 @@ class Index extends Component {
     // collect form data
     let account = event.target.account.value;
     let privateKey = "5KHNxA3DVa3WJJqNNeJKiteyZPoZAuoGkKtwYyZLGxq5aXmPhdG";
+    // let privateKey = "5HzMd5UoV7PfytofB33bVAnfoykCxUREBidEZ4Aqxiw6QysCF4g";
+    // let privateKey = "5JcEQKcdXBGrerVa2w35EE1amFNgRB9Sd5kZSU4rJY2h25r7KCA";
     let stakeAmount = event.target.stakeAmount.value;
 
     // prepare variables for the switch below to send transactions
@@ -101,9 +103,10 @@ class Index extends Component {
     // define actionName and action according to event type
     switch (event.type) {
       case "submit":
-        actionName = "update";
+        actionName = "startgame";
         actionData = {
           user: account,
+          challenge: 'rapid', //todo rjs
           stakeAmount: stakeAmount
         };
         break;
@@ -125,7 +128,7 @@ class Index extends Component {
         {
           actions: [
             {
-              account: "notechainacc",
+              account: actionData.user,
               name: actionName,
               authorization: [
                 {
