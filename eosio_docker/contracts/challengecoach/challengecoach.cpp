@@ -1,4 +1,5 @@
 #include <eosiolib/eosio.hpp>
+#include <eosiolib/asset.hpp>
 
 using namespace eosio;
 
@@ -56,6 +57,43 @@ CONTRACT ccoach : public eosio::contract {
     user_table _users;
     // ----- USER table end -----
 
+    // ----- GAMES table start -----
+    TABLE gamestruct
+    {
+      // uint64_t prim_key;       // primary key
+      name user;               // account name for the user
+      std::string challenge;
+      // uint64_t stakeAmount; // the note message
+      // uint64_t timestamp;      // the store the last update block time
+
+      uint64_t primary_key() const { return user.value; }
+      std::string secondary_key() const {return challenge; }
+
+    };
+    typedef eosio::multi_index<name("gamestruct"), gamestruct, 
+    indexed_by<"user"_n, const_mem_fun<gamestruct, std::string, &gamestruct::secondary_key>>> games;
+    //// local instances of the multi index
+    games _games;
+    // ----- GAMES table end -----
+
+    // ----- DEPOSIT table start -----
+    TABLE deposit
+    {
+      // uint64_t prim_key;       // primary key
+      name user;               // account name for the user
+      asset balance;
+      // uint64_t stakeAmount; // the note message
+      // uint64_t timestamp;      // the store the last update block time
+
+       uint64_t primary_key() const { return user.value; }
+       uint64_t get_by_user() const { return user.value; }
+    };
+    typedef eosio::multi_index<name("deposit"), deposit, 
+    indexed_by<"user"_n, const_mem_fun<deposit, uint64_t, &deposit::get_by_user>>> deposits;
+    //// local instances of the multi index
+    deposits _deposits;
+    // ----- DEPOSIT table end -----
+
     // ----- CHALLENGE table start -----
     TABLE challenge
     {
@@ -81,6 +119,8 @@ CONTRACT ccoach : public eosio::contract {
     ccoach( name receiver, name code, datastream<const char*> ds ):
                 contract( receiver, code, ds ),
                 _users( receiver, receiver.value ),
+                _games( receiver, receiver.value ),
+                _deposits( receiver, receiver.value ),
                 _challenges( receiver, receiver.value ) {}
 
     ACTION newchallenge(std::string& challengeName, uint64_t coach) {
