@@ -1,5 +1,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
+#include <vector>
+// #include<iostream>
 
 using namespace eosio;
 
@@ -62,17 +64,17 @@ CONTRACT ccoach : public eosio::contract {
     {
       // uint64_t prim_key;       // primary key
       name user;               // account name for the user
-      std::string challenge;
+      uint64_t challenge;
       bool won;
       // uint64_t stakeAmount; // the note message
       // uint64_t timestamp;      // the store the last update block time
 
       uint64_t primary_key() const { return user.value; }
-      std::string secondary_key() const {return challenge; }
+      uint64_t secondary_key() const {return challenge; }
 
     };
-    // typedef eosio::multi_index<name("resultstruct"), resultstruct, indexed_by<"user"_n, const_mem_fun<resultstruct, std::string, &resultstruct::secondary_key>>> games;
-    typedef eosio::multi_index<"user"_n, resultstruct> results;
+
+    typedef eosio::multi_index<"resultstruct"_n, resultstruct, indexed_by<"getbychal"_n, const_mem_fun<resultstruct, uint64_t, &resultstruct::secondary_key>>> results;
     //// local instances of the multi index
     results _results;
     // ----- results table end -----
@@ -223,14 +225,52 @@ CONTRACT ccoach : public eosio::contract {
       }
     }
 
+    uint64_t getNumericChallenge(std::string challenge){
+        if (challenge == "rapid")
+          return 0;
+        if(challenge == "easy")
+          return 1;
+        return 2;
+    }
+
     ACTION coachdecide( name user, std::string& challenge, bool won, std::string& imageUrl, std::string& imageHash) {
       require_auth( _self ); //scatter use?
 
+        
+
+        //todo validaiton on chall != 100
+
         _results.emplace(_self, [&](auto &new_result) {
           new_result.user = user;
-          new_result.challenge = challenge;
+          new_result.challenge = getNumericChallenge(challenge);
           new_result.won = won;
         });
+    }
+
+    ACTION endgame( std::string& challenge ) {
+      require_auth( _self ); 
+
+      std::vector<std::pair<name,uint64_t> > playersWon;
+      uint64_t poolSum = 0;
+      auto idx = _results.get_index<"getbychal"_n>();
+      auto lower = idx.lower_bound(getNumericChallenge(challenge));
+      auto upper = idx.upper_bound(getNumericChallenge(challenge));
+      
+      
+      for(auto it = lower; it != upper; it++){
+          auto deposits_itr = _deposits.find((it->user).value);
+          if(!(it->won))
+            poolSum += deposits_itr->balance;
+          else
+            playersWon.push_back(std::make_pair(it->user, deposits_itr->balance));
+      }
+
+      for(auto it : playersWon){
+        printf("%s",(it.first).value);
+        //payUser(it->first, it->second + poolSum/playersWon.size());
+      }
+      printf("test###");
+
     }
 
     ACTION startgame( name user, std::string& challenge, int64_t stakeAmount) {
@@ -271,4 +311,4 @@ CONTRACT ccoach : public eosio::contract {
 };
 
 // specify the contract name, and export a public action: update
-EOSIO_DISPATCH( ccoach, (newchallenge)(receiveeos)(startgame) )
+EOSIO_DISPATCH( ccoach, (newchallenge)(receiveeos)(startgame)(endgame) )
