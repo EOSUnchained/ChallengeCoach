@@ -26,11 +26,13 @@ const styles = theme => ({
   paper: {
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2
+    paddingBottom: theme.spacing.unit * 2,
+    marginTop: 30
   },
   formButton: {
     marginTop: theme.spacing.unit,
-    width: "100%"
+    width: "100%",
+    padding: "30px"
   },
   pre: {
     background: "#ccc",
@@ -48,12 +50,39 @@ class Index extends Component {
       price1: "20",
       price2: "50",
       price3: "100",
-      selectedPrice: "0"
+      selectedPrice: "20",
+      challenges: [
+        [
+          "Rapid",
+          " Turbo Fat Buster",
+          " Ru Wikmann",
+          " 12 Nov - 2 Dec",
+          " 10-50 EOS"
+        ],
+        [
+          "Easy",
+          " What the rock is cooking",
+          " Dwayne Johnson",
+          " 13 Nov - 30 Dec",
+          " 20-100 EOS"
+        ],
+        [
+          "Steady",
+          " Don't you wish?",
+          " Nicole Scherzinger",
+          " 28 Nov - 17 Feb",
+          " 40-200 EOS"
+        ]
+      ],
+      rapid_challenge: "",
+      dataShown: false,
+      stakeShow: false,
+      easy_challenge: "",
+      steady_challenge: ""
     };
     this.handleFormEvent = this.handleFormEvent.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
-
   // generic function to handle form events (e.g. "submit" / "reset")
   // push transactions to the blockchain by using eosjs
   async handleFormEvent(event) {
@@ -62,7 +91,7 @@ class Index extends Component {
 
     // collect form data
     let account = event.target.account.value;
-    let privateKey = event.target.privateKey.value;
+    let privateKey = "5KHNxA3DVa3WJJqNNeJKiteyZPoZAuoGkKtwYyZLGxq5aXmPhdG";
     let stakeAmount = event.target.stakeAmount.value;
 
     // prepare variables for the switch below to send transactions
@@ -124,6 +153,15 @@ class Index extends Component {
     }
   }
 
+  toggle = event => {
+    event.preventDefault();
+    this.setState({ dataShown: true });
+  };
+
+  toggleStake = () => {
+    this.setState({ stakeShow: true });
+  };
+
   handleClick(price) {
     this.setState({ selectedPrice: price });
   }
@@ -171,67 +209,118 @@ class Index extends Component {
     let noteCards = noteTable.map((row, i) =>
       generateCard(i, row.timestamp, row.user, row.stakeAmount)
     );
+    let dataComponent = null;
+    if (this.state.dataShown) {
+      dataComponent = this.state.challenges[0][0];
+    }
 
     return (
-      <div>
+      <div class="container">
         <AppBar position="static" color="default">
           <Toolbar>
             <Typography variant="title" color="inherit">
-              Note Chain
+              Challenge Coach
             </Typography>
           </Toolbar>
         </AppBar>
-        {noteCards}
+
         <Paper className={classes.paper}>
-          <form onSubmit={this.handleFormEvent}>
-            <TextField
-              name="account"
-              autoComplete="off"
-              label="Account"
-              margin="normal"
-              fullWidth
-            />
-            <TextField
-              name="privateKey"
-              autoComplete="off"
-              label="Private key"
-              margin="normal"
-              fullWidth
-            />
-            <input
-              type="radio"
-              name="stakeAmount"
-              value={this.state.price1}
-              checked={this.state.price1 === this.state.selectedPrice}
-              onChange={() => this.handleClick(this.state.price1)}
-            />
-            {this.state.price1}
-            <input
-              type="radio"
-              name="stakeAmount"
-              value={this.state.price2}
-              checked={this.state.price2 === this.state.selectedPrice}
-              onChange={() => this.handleClick(this.state.price2)}
-            />
-            {this.state.price2}
-            <input
-              type="radio"
-              name="stakeAmount"
-              value={this.state.price3}
-              checked={this.state.price3 === this.state.selectedPrice}
-              onChange={() => this.handleClick(this.state.price3)}
-            />
-            {this.state.price3}
+          <form onSubmit={this.toggle}>
+            <h2>Step One</h2>
+            <p>
+              <span>GET FIT AND GET PAID</span> WITH SUPPORT FROM YOUR FRIENDS
+            </p>
             <Button
               variant="contained"
               color="primary"
               className={classes.formButton}
               type="submit"
             >
-              Add / Update note
+              Browse Challenges
             </Button>
           </form>
+          <ul>
+            {this.state.dataShown &&
+              this.state.challenges.map(challenge => {
+                return (
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    className={classes.formButton}
+                    onClick={this.toggleStake}
+                  >
+                    {challenge}
+                  </Button>
+                );
+              })}
+          </ul>
         </Paper>
+
+        {this.state.stakeShow ? (
+          <Paper className={classes.paper}>
+            <form onSubmit={this.handleFormEvent}>
+              <h2>Set your stake:</h2>
+              <TextField
+                name="account"
+                autoComplete="off"
+                label="Account"
+                margin="normal"
+                fullWidth
+              />
+
+              <input
+                type="radio"
+                name="stakeAmount"
+                className={classes.foption}
+                id="r3"
+                value={this.state.price1}
+                checked={this.state.price1 === this.state.selectedPrice}
+                onChange={() => this.handleClick(this.state.price1)}
+              />
+              <label for="r3">
+                <span />
+                {this.state.price1}
+              </label>
+
+              <input
+                type="radio"
+                name="stakeAmount"
+                className={classes.soption}
+                id="r2"
+                value={this.state.price2}
+                checked={this.state.price2 === this.state.selectedPrice}
+                onChange={() => this.handleClick(this.state.price2)}
+              />
+              <label for="r2">
+                <span />
+                {this.state.price2}
+              </label>
+              <input
+                type="radio"
+                name="stakeAmount"
+                className={classes.toption}
+                id="r1"
+                value={this.state.price3}
+                checked={this.state.price3 === this.state.selectedPrice}
+                onChange={() => this.handleClick(this.state.price3)}
+              />
+              <label for="r1">
+                <span />
+                {this.state.price3}
+              </label>
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.formButton}
+                type="submit"
+              >
+                Add / Update note
+              </Button>
+            </form>
+          </Paper>
+        ) : (
+          undefined
+        )}
       </div>
     );
   }

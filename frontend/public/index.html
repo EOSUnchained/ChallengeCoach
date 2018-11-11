@@ -1,12 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
+    />
     <title>eosio bootstrap</title>
+    <style>
+      body,
+      html {
+        height: 100%;
+        background: #e0d7d7;
+        font-family: "Lato", sans-serif;
+      }
+
+      .container {
+        display: block;
+        position: relative;
+        margin: 40px auto;
+        height: auto;
+        padding: 20px;
+      }
+
+      input[type="radio"] {
+        display: none;
+        size: 100px;
+      }
+
+      input[type="radio"] + label {
+        color: #3f51b5;
+        font-family: Arial, sans-serif;
+        font-size: 30px;
+        margin: 15px;
+      }
+
+      input[type="radio"] + label span {
+        display: inline-block;
+        width: 19px;
+        height: 19px;
+        margin: -1px 4px 0 0;
+        vertical-align: middle;
+        background: url(http://webdesigntutsplus.s3.amazonaws.com/tuts/391_checkboxes/check_radio_sheet.png) -38px
+          top no-repeat;
+        cursor: pointer;
+      }
+
+      input[type="radio"]:checked + label span {
+        background: url(http://webdesigntutsplus.s3.amazonaws.com/tuts/391_checkboxes/check_radio_sheet.png) -57px
+          top no-repeat;
+      }
+      form p {
+        text-align: center;
+        font-weight: bold;
+        font-style: oblique;
+      }
+      form p span {
+        font-size: 30px;
+        color: blueviolet;
+        font-style: italic;
+      }
+    </style>
 
     <script src="https://www.gstatic.com/firebasejs/5.5.8/firebase.js"></script>
     <script>
@@ -22,7 +82,7 @@
       firebase.initializeApp(config);
     </script>
   </head>
-  <body style="margin:0;padding:0;background:#fafafa">
+  <body>
     <div id="root"></div>
   </body>
 </html>
