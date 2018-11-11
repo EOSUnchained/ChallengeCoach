@@ -158,8 +158,14 @@ class Index extends Component {
     this.setState({ dataShown: true });
   };
 
-  toggleStake = () => {
-    this.setState({ stakeShow: true });
+  toggleStake = a => {
+    if (a === "Rapid") {
+      this.setState({ stakeShow: true, price1: 10, price2: 25, price3: 50 });
+    } else if (a === "Easy") {
+      this.setState({ stakeShow: true, price1: 20, price2: 50, price3: 100 });
+    } else if (a === "Steady") {
+      this.setState({ stakeShow: true, price1: 40, price2: 100, price3: 200 });
+    }
   };
 
   handleClick(price) {
@@ -247,7 +253,7 @@ class Index extends Component {
                     variant="contained"
                     color="secondary"
                     className={classes.formButton}
-                    onClick={this.toggleStake}
+                    onClick={() => this.toggleStake(challenge[0])}
                   >
                     {challenge}
                   </Button>
@@ -314,9 +320,10 @@ class Index extends Component {
                 className={classes.formButton}
                 type="submit"
               >
-                Add / Update note
+                Place your stake
               </Button>
             </form>
+            {noteCards}
           </Paper>
         ) : (
           undefined
