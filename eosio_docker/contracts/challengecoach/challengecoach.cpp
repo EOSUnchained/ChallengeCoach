@@ -126,6 +126,19 @@ CONTRACT ccoach : public eosio::contract {
                 _deposits( receiver, receiver.value ),
                 _challenges( receiver, receiver.value ) {}
 
+    //   ACTION newuser(std::string& challengeName, uint64_t coach) {
+    //   // to sign the action with the given account
+    //   // require_auth( coach ); // TODO how to auth it's a valid on chain coach?
+
+    //   // create new user
+    //     _users.emplace( _self, [&]( auto& new_user ) {
+    //       new_user.prim_key    = _users.available_primary_key();
+    //       new_user.user        = user;
+    //       new_user.name        = name;
+    //       new_user.stake       = stake;
+    //     });
+    // }
+
     ACTION newchallenge(std::string& challengeName, uint64_t coach) {
       // to sign the action with the given account
       // require_auth( coach ); // TODO how to auth it's a valid on chain coach?
@@ -165,7 +178,7 @@ CONTRACT ccoach : public eosio::contract {
 
       // create new / update note depends whether the user account exist or not
       if (isnewuser(user)) {
-        // insert new note
+        // insert new user
         _users.emplace( _self, [&]( auto& new_user ) {
           new_user.prim_key    = _users.available_primary_key();
           new_user.user        = user;
