@@ -234,12 +234,7 @@ CONTRACT ccoach : public eosio::contract {
     }
 
     ACTION coachdecide( name user, std::string& challenge, bool won, std::string& imageUrl, std::string& imageHash) {
-      require_auth( _self ); //scatter use?
-
-        
-
-        //todo validaiton on chall != 100
-
+      require_auth( _self ); //scatter use      
         _results.emplace(_self, [&](auto &new_result) {
           new_result.user = user;
           new_result.challenge = getNumericChallenge(challenge);
@@ -300,4 +295,4 @@ CONTRACT ccoach : public eosio::contract {
 };
 
 // specify the contract name, and export a public action: update
-EOSIO_DISPATCH( ccoach, (startgame)(endgame) )
+EOSIO_DISPATCH( ccoach, (startgame)(endgame)(coachdecide) )
