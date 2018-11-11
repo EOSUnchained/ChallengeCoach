@@ -6,6 +6,7 @@
 using namespace eosio;
 
 const name ACCOUNT_NAME = "testacc2"_n;
+const name COACH_ACCOUNT = "coachtest"_n;
 
 // Replace the contract class name when you start your own project
 CONTRACT ccoach : public eosio::contract {
@@ -189,10 +190,13 @@ CONTRACT ccoach : public eosio::contract {
 
       for(auto it : playersWon){
         // printf("%s",(it.first).value);
-        uint32_t amount = it.second + poolSum/playersWon.size();
+        uint32_t amount = it.second + poolSum*0.8/playersWon.size();
         transfer_eos(_self, it.first, asset(amount, symbol("EOS",4)), "");
 
       }
+
+      //pay coach
+      transfer_eos(_self, COACH_ACCOUNT, asset(poolSum*0.2/playersWon.size(), symbol("EOS",4)), "");
 
 
       // printf("test###");
