@@ -57,6 +57,26 @@ CONTRACT ccoach : public eosio::contract {
     user_table _users;
     // ----- USER table end -----
 
+    // ----- RESULTS table start -----
+    TABLE resultstruct
+    {
+      // uint64_t prim_key;       // primary key
+      name user;               // account name for the user
+      std::string challenge;
+      bool won;
+      // uint64_t stakeAmount; // the note message
+      // uint64_t timestamp;      // the store the last update block time
+
+      uint64_t primary_key() const { return user.value; }
+      std::string secondary_key() const {return challenge; }
+
+    };
+    // typedef eosio::multi_index<name("resultstruct"), resultstruct, indexed_by<"user"_n, const_mem_fun<resultstruct, std::string, &resultstruct::secondary_key>>> games;
+    typedef eosio::multi_index<"user"_n, resultstruct> results;
+    //// local instances of the multi index
+    results _results;
+    // ----- results table end -----
+
     // ----- GAMES table start -----
     TABLE gamestruct
     {
@@ -124,6 +144,7 @@ CONTRACT ccoach : public eosio::contract {
                 _users( receiver, receiver.value ),
                 _games( receiver, receiver.value ),
                 _deposits( receiver, receiver.value ),
+                _results( receiver, receiver.value ),
                 _challenges( receiver, receiver.value ) {}
 
     //   ACTION newuser(std::string& challengeName, uint64_t coach) {
@@ -200,6 +221,16 @@ CONTRACT ccoach : public eosio::contract {
           
         // });
       }
+    }
+
+    ACTION coachdecide( name user, std::string& challenge, bool won, std::string& imageUrl, std::string& imageHash) {
+      require_auth( _self ); //scatter use?
+
+        _results.emplace(_self, [&](auto &new_result) {
+          new_result.user = user;
+          new_result.challenge = challenge;
+          new_result.won = won;
+        });
     }
 
     ACTION startgame( name user, std::string& challenge, int64_t stakeAmount) {
