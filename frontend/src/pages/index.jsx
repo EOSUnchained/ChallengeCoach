@@ -54,6 +54,32 @@ class Index extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
+  getTable2() {
+    const rpc = new JsonRpc(endpoint);
+    rpc.get_table_rows({
+      "json": true,
+      "code": "notechainacc",   // contract who owns the table
+      "scope": "notechainacc",  // scope of the table
+      "table": "notestruct",    // name of the table as specified by the contract abi
+      "limit": 100,
+    }).then(result => this.setState({ noteTable: result.rows }));
+  }
+
+  writeUserData2(userId, name, email, imageUrl) {
+    debugger;
+    firebase.database().ref('player/' + userId).set({
+      username: name,
+      email: email,
+      profile_picture : imageUrl
+    })
+  }
+
+  // async handleFormEvent(event) {
+  //   debugger
+  //   this.writeUserData2(5, 'bob', 'bob@email', 'url')
+  //   // this.getTable2()
+  // }
+
   // generic function to handle form events (e.g. "submit" / "reset")
   // push transactions to the blockchain by using eosjs
   async handleFormEvent(event) {
