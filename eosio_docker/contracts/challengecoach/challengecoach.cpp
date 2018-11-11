@@ -77,6 +77,21 @@ CONTRACT ccoach : public eosio::contract {
     games _games;
     // ----- GAMES table end -----
 
+
+    TABLE boosterstruct
+    {
+            // uint64_t prim_key;       // primary key
+        name user;               // account name for the user
+        name booster;
+
+        uint64_t primary_key() const { return user.value; }
+        uint64_t secondary_key() const {return booster.value; }
+
+    };
+    typedef eosio::multi_index<"boosterstruct"_n, boosterstruct> boosters;
+    //// local instances of the multi index
+    boosters _boosters;
+
     // ----- DEPOSIT table start -----
     TABLE deposit
     {
@@ -144,6 +159,29 @@ CONTRACT ccoach : public eosio::contract {
       }
 
     }
+
+    ACTION boostgame(name booster, name user, int64_t stakeAmount){
+        require_auth(booster);
+
+        _boosters.emplace(_self, [&](auto &new_user) {
+            new_user.user = user;
+            new_user.booster = booster;
+        });
+
+        auto deposits_itr = _deposits.find(booster.value);
+        if(deposits_itr == _deposits.end())
+        {
+            _deposits.emplace(booster, [&](auto &row) {
+                row.user = booster;
+                row.balance = stakeAmount;
+            });
+        }
+        else {
+            _deposits.modify(deposits_itr, _self, [&](auto &row){
+                row.balance +=stakeAmount;
+            });
+        }
+    }
   
 
     uint64_t getNumericChallenge(std::string challenge){
@@ -175,8 +213,14 @@ CONTRACT ccoach : public eosio::contract {
       
       for(auto it = lower; it != upper; it++){
           auto deposits_itr = _deposits.find((it->user).value);
-          if(!(it->won))//we pool the money from losers
-            poolSum += deposits_itr->balance;
+          auto booster_itr = _boosters.find((it->user).value);
+          if(!(it->won)) {//we pool the money from losers
+              poolSum += deposits_itr->balance;
+              auto boosterDeposits_itr = _deposits.find(booster_itr->booster.value);
+              if(boosterDeposits_itr != _boosters.end()){
+                  boostedSum = boosterDeposits_itr->balance;
+              }
+          }
             
           else // winners
             playersWon.push_back(std::make_pair(it->user, deposits_itr->balance));
