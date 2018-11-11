@@ -13,7 +13,10 @@ import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import firebase from 'firebase/app';
+import firebase from '../firebase.js';
+
+import { createChallenage, h } from '../helpers'
+// import { createChallenage } from '../firebase'
 
 // eosio endpoint
 const endpoint = "http://localhost:8888";
@@ -81,15 +84,19 @@ class Index extends Component {
     })
   }
 
-  // async handleFormEvent(event) {
-  //   debugger
-  //   this.writeUserData2(5, 'bob', 'bob@email', 'url')
-  //   // this.getTable2()
-  // }
+  async handleFormEvent(event) {
+    // debugger
+    createChallenage()
+    this.writeUserData2(8, 'haname', 'email', 'url')
+    // h()
+    // await test()
+    debugger
+    // this.getTable2()
+  }
 
   // generic function to handle form events (e.g. "submit" / "reset")
   // push transactions to the blockchain by using eosjs
-  async handleFormEvent(event) {
+  async handleFormEvent2(event) {
     // stop default behaviour
     event.preventDefault();
 

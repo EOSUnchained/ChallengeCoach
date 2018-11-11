@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "challenge-coach"
+    "default": "challenge-coach",
+    "cc": "challenge-coach"
   }
 }
