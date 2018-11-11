@@ -93,7 +93,7 @@ CONTRACT ccoach : public eosio::contract {
 
     };
     // typedef eosio::multi_index<name("gamestruct"), gamestruct, indexed_by<"user"_n, const_mem_fun<gamestruct, std::string, &gamestruct::secondary_key>>> games;
-    typedef eosio::multi_index<"user"_n, gamestruct> games;
+    typedef eosio::multi_index<"gamestruct"_n, gamestruct> games;
     //// local instances of the multi index
     games _games;
     // ----- GAMES table end -----
@@ -110,7 +110,7 @@ CONTRACT ccoach : public eosio::contract {
        uint64_t primary_key() const { return user.value; }
        uint64_t get_by_user() const { return user.value; }
     };
-    typedef eosio::multi_index<"user"_n, deposit> deposits;
+    typedef eosio::multi_index<"deposit"_n, deposit> deposits;
     // typedef eosio::multi_index<name("deposit"), deposit, 
     // indexed_by<"user"_n, const_mem_fun<deposit, uint64_t, &deposit::get_by_user>>> deposits;
     // indexed_by<"user"_n, const_mem_fun<deposit> deposits;
@@ -265,32 +265,21 @@ CONTRACT ccoach : public eosio::contract {
             playersWon.push_back(std::make_pair(it->user, deposits_itr->balance));
       }
 
-      for(auto it : playersWon){
-        printf("%s",(it.first).value);
-        //payUser(it->first, it->second + poolSum/playersWon.size());
-      }
-      printf("test###");
+      // for(auto it : playersWon){
+      //   // printf("%s",(it.first).value);
+      //   //payUser(it->first, it->second + poolSum/playersWon.size());
+      // }
+      // printf("test###");
 
     }
 
     ACTION startgame( name user, std::string& challenge, int64_t stakeAmount) {
       require_auth( user ); //scatter use?
-      // create new / update note depends whether the user account exist or not
-      // if (isnewuser(user)) {
-        // insert new note
-        _games.emplace(_self, [&](auto &new_user) {
-          new_user.user = user;
-          new_user.challenge = challenge;
-        });
-      // } else {
-      //   auto game_index = _games.get_index<name("getbyuser")>();
-      //   auto &game_entry = game_index.get(user.value);
-      //   // update existing note
-      //   _games.modify(game_entry, _self, [&](auto &modified_user) {
-      //     modified_user.challenge = challenge;
-      //   });
 
-      // }
+      _games.emplace(_self, [&](auto &new_user) {
+        new_user.user = user;
+        new_user.challenge = challenge;
+      });
 
       auto deposits_itr = _deposits.find(user.value);
       if(deposits_itr == _deposits.end())
@@ -311,4 +300,4 @@ CONTRACT ccoach : public eosio::contract {
 };
 
 // specify the contract name, and export a public action: update
-EOSIO_DISPATCH( ccoach, (newchallenge)(receiveeos)(startgame)(endgame) )
+EOSIO_DISPATCH( ccoach, (startgame)(endgame) )
