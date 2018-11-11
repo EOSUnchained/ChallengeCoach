@@ -5,17 +5,7 @@
 
 using namespace eosio;
 
-// Smart Contract Name: notechain
-// Table struct:
-//   notestruct: multi index table to store the notes
-//     prim_key(uint64): primary key
-//     user(name): account name for the user
-//     note(string): the note message
-//     timestamp(uint64): the store the last update block time
-// Public method:
-//   isnewuser => to check if the given account name has note in table or not
-// Public actions:
-//   update => put the note into the multi-index table and sign by the given account
+const name ACCOUNT_NAME = "testacc2"_n;
 
 // Replace the contract class name when you start your own project
 CONTRACT ccoach : public eosio::contract {
@@ -27,14 +17,6 @@ CONTRACT ccoach : public eosio::contract {
 
       return user_iterator == user_index.end();
     }
-
-    // bool isnewchallenge( uint64_t challangeId ) {  //TODO
-    //   // get notes by using secordary key
-    //   auto user_index = _users.get_index<name("getbyuser")>();
-    //   auto user_iterator = user_index.find(user.value);
-
-    //   return user_iterator == user_index.end();
-    // }
 
     // ----- USER table start -----
     TABLE userstruct { //todo make userstruct
@@ -66,8 +48,6 @@ CONTRACT ccoach : public eosio::contract {
       name user;               // account name for the user
       uint64_t challenge;
       bool won;
-      // uint64_t stakeAmount; // the note message
-      // uint64_t timestamp;      // the store the last update block time
 
       uint64_t primary_key() const { return user.value; }
       uint64_t secondary_key() const {return challenge; }
@@ -85,8 +65,6 @@ CONTRACT ccoach : public eosio::contract {
       // uint64_t prim_key;       // primary key
       name user;               // account name for the user
       std::string challenge;
-      // uint64_t stakeAmount; // the note message
-      // uint64_t timestamp;      // the store the last update block time
 
       uint64_t primary_key() const { return user.value; }
       std::string secondary_key() const {return challenge; }
@@ -104,18 +82,11 @@ CONTRACT ccoach : public eosio::contract {
       // uint64_t prim_key;       // primary key
       name user;               // account name for the user
       int64_t balance;
-      // uint64_t stakeAmount; // the note message
-      // uint64_t timestamp;      // the store the last update block time
 
        uint64_t primary_key() const { return user.value; }
        uint64_t get_by_user() const { return user.value; }
     };
     typedef eosio::multi_index<"deposit"_n, deposit> deposits;
-    // typedef eosio::multi_index<name("deposit"), deposit, 
-    // indexed_by<"user"_n, const_mem_fun<deposit, uint64_t, &deposit::get_by_user>>> deposits;
-    // indexed_by<"user"_n, const_mem_fun<deposit> deposits;
-
-    //// local instances of the multi index
     deposits _deposits;
     // ----- DEPOSIT table end -----
 
@@ -149,86 +120,35 @@ CONTRACT ccoach : public eosio::contract {
                 _results( receiver, receiver.value ),
                 _challenges( receiver, receiver.value ) {}
 
-    //   ACTION newuser(std::string& challengeName, uint64_t coach) {
-    //   // to sign the action with the given account
-    //   // require_auth( coach ); // TODO how to auth it's a valid on chain coach?
-
-    //   // create new user
-    //     _users.emplace( _self, [&]( auto& new_user ) {
-    //       new_user.prim_key    = _users.available_primary_key();
-    //       new_user.user        = user;
-    //       new_user.name        = name;
-    //       new_user.stake       = stake;
-    //     });
-    // }
-
-    ACTION newchallenge(std::string& challengeName, uint64_t coach) {
-      // to sign the action with the given account
-      // require_auth( coach ); // TODO how to auth it's a valid on chain coach?
-
-      // create new challenge
-      _challenges.emplace( _self, [&]( auto& new_challenge ) {
-          new_challenge.challengeId  = _challenges.available_primary_key();
-          new_challenge.challengeName = challengeName;
-          new_challenge.totalStake    = 0;
-          new_challenge.coach         = coach;
-        });
-      // if (isnewchallenge(user)) {
-      //   // insert new note
-      //   _challenges.emplace( _self, [&]( auto& new_challenge ) {
-      //     new_challenge.prim_key      = _challenges.available_primary_key();
-      //     new_challenge.challenge_id  = challenge_id;
-      //     new_challenge.challengeName = challengeName;
-      //     new_challenge.totalStake    = 0;
-      //     new_challenge.coach         = coach;
-      //   });
-      // } else {
-      //   // get object by secordary key
-      //   auto note_index = _notes.get_index<name("getbyuser")>();
-      //   auto &note_entry = note_index.get(user.value);
-      //   // update existing note
-      //   _notes.modify( note_entry, _self, [&]( auto& modified_user ) {
-      //     modified_user.note      = note;
-      //     modified_user.timestamp = now();
-      //   });
-      // }
-    }
-
-    // upon receiving eos the user is enrolled in the challenge of choice 
-    ACTION receiveeos( name user, std::string& name,  uint16_t stake, uint64_t challenge_key) {
-      // to sign the action with the given account
+    ACTION startgame( name user, std::string& challenge, int64_t stakeAmount) {
       require_auth( user ); //scatter use?
 
-      // create new / update note depends whether the user account exist or not
-      if (isnewuser(user)) {
-        // insert new user
-        _users.emplace( _self, [&]( auto& new_user ) {
-          new_user.prim_key    = _users.available_primary_key();
-          new_user.user        = user;
-          new_user.name        = name;
-          new_user.stake       = stake;
-        });
-      } else {
-        // get object by secordary key
-        // auto user_index = _users.get_index<name("getbyuser")>();
-        // auto &user_entry = user_index.get(user.value);
+      _games.emplace(_self, [&](auto &new_user) {
+        new_user.user = user;
+        new_user.challenge = challenge;
+      });
 
-        //RJS need to call an inline action? 
-        // a) to enroll in challenge?
-        // b) actually transfer eos
-
-        // // update existing user
-        // _users.modify( user_entry, _self, [&]( auto& modified_user ) {
-        //   modified_user.stake      = stake;
-          
-        // });
+      auto deposits_itr = _deposits.find(user.value);
+      if(deposits_itr == _deposits.end())
+      {
+          _deposits.emplace(user, [&](auto &row) {
+              row.user = user;
+              row.balance = stakeAmount;
+          });
       }
+      else {
+        _deposits.modify(deposits_itr, _self, [&](auto &row){
+            row.balance +=stakeAmount;
+        });
+      }
+
     }
+  
 
     uint64_t getNumericChallenge(std::string challenge){
-        if (challenge == "rapid")
+        if (challenge == "Rapid")
           return 0;
-        if(challenge == "easy")
+        if(challenge == "Easy")
           return 1;
         return 2;
     }
@@ -254,43 +174,42 @@ CONTRACT ccoach : public eosio::contract {
       
       for(auto it = lower; it != upper; it++){
           auto deposits_itr = _deposits.find((it->user).value);
-          if(!(it->won))
+          if(!(it->won))//we pool the money from losers
             poolSum += deposits_itr->balance;
-          else
+            
+          else // winners
             playersWon.push_back(std::make_pair(it->user, deposits_itr->balance));
+
+          //delete their deposits
+          // eosio_assert(deposits_itr != addresses.end(), "Record does not exist");
+          _deposits.erase(deposits_itr);
       }
 
-      // for(auto it : playersWon){
-      //   // printf("%s",(it.first).value);
-      //   //payUser(it->first, it->second + poolSum/playersWon.size());
-      // }
+      
+
+      for(auto it : playersWon){
+        // printf("%s",(it.first).value);
+        uint32_t amount = it.second + poolSum/playersWon.size();
+        transfer_eos(_self, it.first, asset(amount, symbol("EOS",4)), "");
+
+      }
+
+
       // printf("test###");
 
     }
 
-    ACTION startgame( name user, std::string& challenge, int64_t stakeAmount) {
-      require_auth( user ); //scatter use?
-
-      _games.emplace(_self, [&](auto &new_user) {
-        new_user.user = user;
-        new_user.challenge = challenge;
-      });
-
-      auto deposits_itr = _deposits.find(user.value);
-      if(deposits_itr == _deposits.end())
-      {
-          _deposits.emplace(user, [&](auto &row) {
-              row.user = user;
-              row.balance = stakeAmount;
-          });
-      }
-      else {
-        _deposits.modify(deposits_itr, _self, [&](auto &row){
-            row.balance +=stakeAmount;
-        });
-      }
-
+    void transfer_eos(name from, name to, asset quantity, std::string memo)
+    {
+        action{
+            permission_level{_self, "active"_n},
+            ACCOUNT_NAME,
+            "transfer"_n,
+            std::tuple<name, name, asset, std::string>{from, to, quantity, memo}
+        }.send();
     }
+
+    
 
 };
 
