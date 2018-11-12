@@ -5,7 +5,7 @@
 
 using namespace eosio;
 
-const name ACCOUNT_NAME = "testacc2"_n;
+const name ACCOUNT_NAME = "testacc"_n;
 
 // Replace the contract class name when you start your own project
 CONTRACT ccoach : public eosio::contract {
@@ -187,6 +187,8 @@ CONTRACT ccoach : public eosio::contract {
 
       
 
+      
+
       for(auto it : playersWon){
         // printf("%s",(it.first).value);
         uint32_t amount = it.second + poolSum/playersWon.size();
@@ -197,6 +199,25 @@ CONTRACT ccoach : public eosio::contract {
 
       // printf("test###");
 
+    }
+
+    ACTION cleanreset() {
+      require_auth( _self ); 
+      // while(_games.begin() != _games.end())
+      // auto games_itr = _games.find("alice"_n.value);
+      // _games.erase(games_itr);
+      // games_itr = _games.find("bob"_n.value);
+      // _games.erase(games_itr);
+
+      auto it = _games.begin();
+      while (it != _games.end()) {
+          it = _games.erase(it);
+      }
+
+      // while(_deposits.begin() != _deposits.end())
+      //   _deposits.erase(_deposits.begin());
+      // while(_results.begin() != _results.end())
+      //   _results.erase(_results.begin());
     }
 
     void transfer_eos(name from, name to, asset quantity, std::string memo)
